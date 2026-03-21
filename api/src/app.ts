@@ -6,7 +6,6 @@ import { config } from './config';
 import lendingRoutes from './routes/lending.routes';
 import healthRoutes from './routes/health.routes';
 import { errorHandler } from './middleware/errorHandler';
-import logger from './utils/logger';
 
 const app: Application = express();
 

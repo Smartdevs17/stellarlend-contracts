@@ -1,9 +1,6 @@
 import {
   Keypair,
-  Networks,
   TransactionBuilder,
-  Operation,
-  Asset,
   Account,
   BASE_FEE,
   Contract,
@@ -16,7 +13,7 @@ import axios from 'axios';
 import { config } from '../config';
 import logger from '../utils/logger';
 import { InternalServerError } from '../utils/errors';
-import { TransactionResponse, TransactionStatus } from '../types';
+import { TransactionResponse } from '../types';
 
 export class StellarService {
   private horizonUrl: string;

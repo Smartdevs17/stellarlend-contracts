@@ -6,14 +6,12 @@
  */
 
 import type {
-    RawPriceData,
     PriceData,
     AggregatedPrice,
 } from '../types/index.js';
 import { BasePriceProvider } from '../providers/base-provider.js';
 import { PriceValidator } from './price-validator.js';
 import { PriceCache } from './cache.js';
-import { scalePrice } from '../config.js';
 import { logger } from '../utils/logger.js';
 
 /**

@@ -3,12 +3,12 @@
  * Comprehensive tests for error handling and fallback mechanisms
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createAggregator } from '../src/services/price-aggregator.js';
 import { createValidator } from '../src/services/price-validator.js';
 import { createPriceCache } from '../src/services/cache.js';
 import { BasePriceProvider } from '../src/providers/base-provider.js';
-import type { RawPriceData, ProviderConfig } from '../src/types/index.js';
+import type { RawPriceData } from '../src/types/index.js';
 
 /**
  * Mock provider that can be configured to fail

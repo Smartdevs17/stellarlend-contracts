@@ -126,7 +126,7 @@ describe('OracleService Integration', () => {
                 updateIntervalMs: 5000,
             });
 
-            const status = service.getStatus();
+            const _status = service.getStatus();
             expect(service).toBeDefined();
         });
     });

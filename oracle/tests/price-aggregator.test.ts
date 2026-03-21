@@ -2,12 +2,12 @@
  * Tests for Price Aggregator Service
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { PriceAggregator, createAggregator } from '../src/services/price-aggregator.js';
 import { createValidator } from '../src/services/price-validator.js';
 import { createPriceCache } from '../src/services/cache.js';
 import { BasePriceProvider } from '../src/providers/base-provider.js';
-import type { RawPriceData, ProviderConfig, HealthStatus } from '../src/types/index.js';
+import type { RawPriceData } from '../src/types/index.js';
 
 /**
  * Mock provider for testing

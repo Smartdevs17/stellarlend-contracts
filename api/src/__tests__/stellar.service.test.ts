@@ -1,10 +1,58 @@
 import { StellarService } from '../services/stellar.service';
 import axios from 'axios';
-import { rpc } from '@stellar/stellar-sdk';
+
 
 jest.mock('axios');
-jest.mock('@stellar/stellar-sdk');
-jest.mock('@stellar/stellar-sdk/rpc');
+jest.mock('@stellar/stellar-sdk', () => {
+  const actual = jest.requireActual('@stellar/stellar-sdk');
+  return {
+    ...actual,
+    Account: jest.fn().mockImplementation((id: string, sequence: string) => ({
+      accountId: () => id,
+      sequenceNumber: () => sequence,
+    })),
+    Keypair: {
+      fromSecret: jest.fn().mockReturnValue({
+        publicKey: jest.fn().mockReturnValue('GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'),
+        sign: jest.fn(),
+      }),
+    },
+    TransactionBuilder: jest.fn().mockImplementation(() => ({
+      addOperation: jest.fn().mockReturnThis(),
+      setTimeout: jest.fn().mockReturnThis(),
+      build: jest.fn().mockReturnValue({
+        toXDR: jest.fn().mockReturnValue('mock_tx_xdr'),
+      }),
+    })),
+    Contract: jest.fn().mockImplementation(() => ({
+      call: jest.fn().mockReturnValue('mock_operation'),
+    })),
+    Address: jest.fn().mockImplementation(() => ({
+      toScVal: jest.fn().mockReturnValue('mock_sc_val'),
+    })),
+    nativeToScVal: jest.fn().mockReturnValue('mock_sc_val'),
+    xdr: {
+      ScVal: {
+        scvVoid: jest.fn().mockReturnValue('mock_void'),
+      },
+    },
+    BASE_FEE: '100',
+  };
+});
+
+jest.mock('@stellar/stellar-sdk/rpc', () => {
+  const mockPrepareTransaction = jest.fn().mockResolvedValue({
+    sign: jest.fn(),
+    toXDR: jest.fn().mockReturnValue('prepared_tx_xdr'),
+  });
+  const mockGetHealth = jest.fn().mockResolvedValue({});
+  return {
+    Server: jest.fn().mockImplementation(() => ({
+      prepareTransaction: mockPrepareTransaction,
+      getHealth: mockGetHealth,
+    })),
+  };
+});
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -123,11 +171,6 @@ describe('StellarService', () => {
   describe('healthCheck', () => {
     it('should return healthy status for all services', async () => {
       mockedAxios.get.mockResolvedValue({ data: {} });
-      
-      const mockSorobanServer = {
-        getHealth: jest.fn().mockResolvedValue({}),
-      };
-      (rpc.Server as jest.Mock).mockImplementation(() => mockSorobanServer);
 
       const result = await service.healthCheck();
 
@@ -137,11 +180,9 @@ describe('StellarService', () => {
 
     it('should return unhealthy status when services fail', async () => {
       mockedAxios.get.mockRejectedValue(new Error('Connection failed'));
-      
-      const mockSorobanServer = {
-        getHealth: jest.fn().mockRejectedValue(new Error('Connection failed')),
-      };
-      (rpc.Server as jest.Mock).mockImplementation(() => mockSorobanServer);
+
+      // Override sorobanServer.getHealth to reject
+      (service as any).sorobanServer.getHealth = jest.fn().mockRejectedValue(new Error('Connection failed'));
 
       const result = await service.healthCheck();
 
@@ -158,14 +199,6 @@ describe('StellarService', () => {
       };
 
       mockedAxios.get.mockResolvedValue({ data: mockAccountData });
-
-      const mockSorobanServer = {
-        prepareTransaction: jest.fn().mockResolvedValue({
-          sign: jest.fn(),
-          toXDR: jest.fn().mockReturnValue('prepared_tx_xdr'),
-        }),
-      };
-      (rpc.Server as jest.Mock).mockImplementation(() => mockSorobanServer);
 
       const result = await service.buildDepositTransaction(
         mockAccountData.id,

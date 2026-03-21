@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { errorHandler } from '../middleware/errorHandler';
-import { ApiError, ValidationError, UnauthorizedError } from '../utils/errors';
+import { ValidationError, UnauthorizedError } from '../utils/errors';
 
 describe('Error Handler Middleware', () => {
   let mockRequest: Partial<Request>;
