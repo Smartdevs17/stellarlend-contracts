@@ -2,7 +2,7 @@
  * Tests for Cache Service
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Cache, PriceCache, createCache, createPriceCache } from '../src/services/cache.js';
 
 describe('Cache', () => {

@@ -1,14 +1,26 @@
 import request from 'supertest';
-import app from '../app';
 import { StellarService } from '../services/stellar.service';
 
 jest.mock('../services/stellar.service');
 
-describe('Lending Controller', () => {
-  let mockStellarService: jest.Mocked<StellarService>;
+// Get the mocked instance that will be created when the controller module loads
+const mockStellarServiceInstance = {
+  buildDepositTransaction: jest.fn(),
+  buildBorrowTransaction: jest.fn(),
+  buildRepayTransaction: jest.fn(),
+  buildWithdrawTransaction: jest.fn(),
+  submitTransaction: jest.fn(),
+  monitorTransaction: jest.fn(),
+  healthCheck: jest.fn(),
+};
 
+(StellarService as jest.Mock).mockImplementation(() => mockStellarServiceInstance);
+
+// Import app AFTER setting up the mock implementation so the controller gets our mock
+import app from '../app';
+
+describe('Lending Controller', () => {
   beforeEach(() => {
-    mockStellarService = new StellarService() as jest.Mocked<StellarService>;
     jest.clearAllMocks();
   });
 
@@ -17,20 +29,18 @@ describe('Lending Controller', () => {
       const mockTxXdr = 'mock_tx_xdr';
       const mockTxHash = 'mock_tx_hash';
 
-      mockStellarService.buildDepositTransaction = jest.fn().mockResolvedValue(mockTxXdr);
-      mockStellarService.submitTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.buildDepositTransaction.mockResolvedValue(mockTxXdr);
+      mockStellarServiceInstance.submitTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
       });
-      mockStellarService.monitorTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.monitorTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
         ledger: 12345,
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app)
         .post('/api/lending/deposit')
@@ -73,20 +83,18 @@ describe('Lending Controller', () => {
       const mockTxXdr = 'mock_tx_xdr';
       const mockTxHash = 'mock_tx_hash';
 
-      mockStellarService.buildBorrowTransaction = jest.fn().mockResolvedValue(mockTxXdr);
-      mockStellarService.submitTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.buildBorrowTransaction.mockResolvedValue(mockTxXdr);
+      mockStellarServiceInstance.submitTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
       });
-      mockStellarService.monitorTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.monitorTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
         ledger: 12345,
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app)
         .post('/api/lending/borrow')
@@ -101,14 +109,12 @@ describe('Lending Controller', () => {
     });
 
     it('should handle transaction failure', async () => {
-      mockStellarService.buildBorrowTransaction = jest.fn().mockResolvedValue('mock_tx_xdr');
-      mockStellarService.submitTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.buildBorrowTransaction.mockResolvedValue('mock_tx_xdr');
+      mockStellarServiceInstance.submitTransaction.mockResolvedValue({
         success: false,
         status: 'failed',
         error: 'Insufficient collateral',
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app)
         .post('/api/lending/borrow')
@@ -128,20 +134,18 @@ describe('Lending Controller', () => {
       const mockTxXdr = 'mock_tx_xdr';
       const mockTxHash = 'mock_tx_hash';
 
-      mockStellarService.buildRepayTransaction = jest.fn().mockResolvedValue(mockTxXdr);
-      mockStellarService.submitTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.buildRepayTransaction.mockResolvedValue(mockTxXdr);
+      mockStellarServiceInstance.submitTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
       });
-      mockStellarService.monitorTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.monitorTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
         ledger: 12345,
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app)
         .post('/api/lending/repay')
@@ -161,20 +165,18 @@ describe('Lending Controller', () => {
       const mockTxXdr = 'mock_tx_xdr';
       const mockTxHash = 'mock_tx_hash';
 
-      mockStellarService.buildWithdrawTransaction = jest.fn().mockResolvedValue(mockTxXdr);
-      mockStellarService.submitTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.buildWithdrawTransaction.mockResolvedValue(mockTxXdr);
+      mockStellarServiceInstance.submitTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
       });
-      mockStellarService.monitorTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.monitorTransaction.mockResolvedValue({
         success: true,
         transactionHash: mockTxHash,
         status: 'success',
         ledger: 12345,
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app)
         .post('/api/lending/withdraw')
@@ -189,14 +191,12 @@ describe('Lending Controller', () => {
     });
 
     it('should handle undercollateralization error', async () => {
-      mockStellarService.buildWithdrawTransaction = jest.fn().mockResolvedValue('mock_tx_xdr');
-      mockStellarService.submitTransaction = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.buildWithdrawTransaction.mockResolvedValue('mock_tx_xdr');
+      mockStellarServiceInstance.submitTransaction.mockResolvedValue({
         success: false,
         status: 'failed',
         error: 'Withdrawal would violate minimum collateral ratio',
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app)
         .post('/api/lending/withdraw')
@@ -213,12 +213,10 @@ describe('Lending Controller', () => {
 
   describe('GET /api/health', () => {
     it('should return healthy status when all services are up', async () => {
-      mockStellarService.healthCheck = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.healthCheck.mockResolvedValue({
         horizon: true,
         sorobanRpc: true,
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app).get('/api/health');
 
@@ -229,12 +227,10 @@ describe('Lending Controller', () => {
     });
 
     it('should return unhealthy status when services are down', async () => {
-      mockStellarService.healthCheck = jest.fn().mockResolvedValue({
+      mockStellarServiceInstance.healthCheck.mockResolvedValue({
         horizon: false,
         sorobanRpc: false,
       });
-
-      (StellarService as jest.Mock).mockImplementation(() => mockStellarService);
 
       const response = await request(app).get('/api/health');
 

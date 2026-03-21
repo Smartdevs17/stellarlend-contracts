@@ -32,13 +32,13 @@ vi.mock('@stellar/stellar-sdk', () => {
                 secret: () => secret,
             })),
         },
-        Contract: vi.fn().mockImplementation((contractId: string) => ({
+        Contract: vi.fn().mockImplementation((_contractId: string) => ({
             call: vi.fn().mockReturnValue({
                 /* operation */
             }),
         })),
         SorobanRpc: {
-            Server: vi.fn().mockImplementation((url: string) => ({
+            Server: vi.fn().mockImplementation((_url: string) => ({
                 getAccount: vi.fn().mockResolvedValue(mockAccount),
                 simulateTransaction: vi.fn().mockResolvedValue({
                     results: [{ xdr: 'mock-xdr' }],
@@ -60,7 +60,7 @@ vi.mock('@stellar/stellar-sdk', () => {
                     NOT_FOUND: 'NOT_FOUND',
                 },
             },
-            assembleTransaction: vi.fn((tx, simulated) => ({
+            assembleTransaction: vi.fn((_tx, _simulated) => ({
                 build: () => mockTransaction,
             })),
         },
@@ -392,7 +392,7 @@ describe('ContractUpdater', () => {
         });
 
         it('should use default retry settings when not provided', () => {
-            const { maxRetries, retryDelayMs, ...minimalConfig } = mockConfig;
+            const { maxRetries: _maxRetries, retryDelayMs: _retryDelayMs, ...minimalConfig } = mockConfig;
 
             const defaultUpdater = createContractUpdater(minimalConfig as any);
 

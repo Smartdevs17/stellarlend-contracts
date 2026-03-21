@@ -2,7 +2,7 @@
  * Tests for Edge Cases and Boundary Conditions
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createAggregator } from '../src/services/price-aggregator.js';
 import { createValidator } from '../src/services/price-validator.js';
 import { createPriceCache } from '../src/services/cache.js';
@@ -161,7 +161,7 @@ describe('Edge Cases', () => {
         it('should handle price scaling for small numbers', () => {
             const smallPrice = 0.0000001;
             const scaled = scalePrice(smallPrice);
-            const unscaled = unscalePrice(scaled);
+            const _unscaled = unscalePrice(scaled);
 
             expect(scaled).toBeGreaterThanOrEqual(0n);
         });
